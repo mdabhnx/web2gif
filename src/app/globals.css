@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary:     #0A0A0B;
+  --bg-secondary:   #141416;
+  --bg-elevated:    #1C1C1F;
+  --accent-primary: #3B82F6;
+  --accent-glow:    #60A5FA;
+  --text-primary:   #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-muted:     #52525B;
+  --border-subtle:  #27272A;
+  --success:        #22C55E;
+  --error:          #EF4444;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans, system-ui, sans-serif);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary) 0%,
+    var(--accent-glow) 50%,
+    var(--accent-primary) 100%
+  );
+  background-size: 200% auto;
+  animation: shimmer 1.5s linear infinite;
+}

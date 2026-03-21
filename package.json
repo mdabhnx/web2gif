@@ -1,0 +1,36 @@
+{
+  "name": "web2gif",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "worker": "ts-node --project tsconfig.json worker/index.ts",
+    "worker:dev": "nodemon --watch worker --watch src/lib --ext ts --exec 'ts-node --project tsconfig.json worker/index.ts'"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@prisma/client": "^5.0.0",
+    "@tailwindcss/postcss": "^4.2.2",
+    "framer-motion": "^11.0.0",
+    "next": "^15.2.0",
+    "playwright": "^1.40.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.2.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/uuid": "^9.0.0",
+    "dotenv": "^16.0.0",
+    "nodemon": "^3.0.0",
+    "prisma": "^5.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.0.0"
+  }
+}
