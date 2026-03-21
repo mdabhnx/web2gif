@@ -1,4 +1,7 @@
-import 'dotenv/config'
+import { config } from 'dotenv'
+config({ path: '.env.local' })
+config()
+
 import { db } from '../src/lib/db'
 import { processJob } from './processor'
 import type { JobOptions } from '../src/types/job'
