@@ -117,7 +117,10 @@ export async function captureScreenshots(
   try {
     const context = await browser.newContext()
     const page = await context.newPage()
-    await page.setViewportSize({ width: options.width, height: options.height })
+    
+    // Use a default height if -1 (full) is requested; we'll resize later
+    const initialHeight = options.height > 0 ? options.height : 800
+    await page.setViewportSize({ width: options.width, height: initialHeight })
 
     const response = await page.goto(url, {
       waitUntil: 'load',
@@ -151,9 +154,17 @@ export async function captureScreenshots(
       )
     })
 
-    const maxScroll = Math.max(0, fullHeight - options.height)
+    let captureHeight = options.height
+    if (options.height === -1) {
+      captureHeight = Math.max(800, fullHeight)
+      await page.setViewportSize({ width: options.width, height: captureHeight })
+    }
+
+
+    const maxScroll = Math.max(0, fullHeight - captureHeight)
     const totalFrames = options.frames
     const scrollStep = totalFrames > 1 ? maxScroll / (totalFrames - 1) : 0
+
     const framePaths: string[] = []
 
     for (let i = 0; i < totalFrames; i++) {

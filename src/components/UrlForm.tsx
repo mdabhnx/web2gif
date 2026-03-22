@@ -5,6 +5,8 @@ import { motion } from 'framer-motion'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
+import { type AspectRatio, RATIO_VALUES } from '@/types/job'
+
 export type SpeedOption = 0.5 | 1 | 2
 export type FrameCount = 8 | 12 | 20 | 30
 
@@ -15,9 +17,10 @@ const SPEED_LABELS: Record<SpeedOption, string> = {
 }
 
 const FRAME_OPTIONS: FrameCount[] = [8, 12, 20, 30]
+const RATIO_OPTIONS: AspectRatio[] = ['16:9', '4:3', '1:1', '9:16', 'full']
 
 interface UrlFormProps {
-  onSubmit: (url: string, speed: SpeedOption, frames: FrameCount) => void
+  onSubmit: (url: string, speed: SpeedOption, frames: FrameCount, ratio: AspectRatio) => void
   disabled: boolean
   loading?: boolean
 }
@@ -27,6 +30,7 @@ export default function UrlForm({ onSubmit, disabled, loading }: UrlFormProps) {
   const [error, setError] = useState('')
   const [speed, setSpeed] = useState<SpeedOption>(1)
   const [frames, setFrames] = useState<FrameCount>(12)
+  const [ratio, setRatio] = useState<AspectRatio>('16:9')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -38,7 +42,6 @@ export default function UrlForm({ onSubmit, disabled, loading }: UrlFormProps) {
       return
     }
 
-    // Auto-prepend https:// if missing scheme
     if (!/^https?:\/\//i.test(finalUrl)) {
       finalUrl = `https://${finalUrl}`
     }
@@ -50,7 +53,7 @@ export default function UrlForm({ onSubmit, disabled, loading }: UrlFormProps) {
       return
     }
 
-    onSubmit(finalUrl, speed, frames)
+    onSubmit(finalUrl, speed, frames, ratio)
   }
 
   return (
@@ -84,6 +87,29 @@ export default function UrlForm({ onSubmit, disabled, loading }: UrlFormProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        {/* Ratio control */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-[var(--text-muted)]">Ratio</span>
+          <div className="flex rounded-lg overflow-hidden border border-[var(--border-subtle)]">
+            {RATIO_OPTIONS.map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setRatio(r)}
+                disabled={disabled || loading}
+                className={[
+                  'px-3 py-1 text-xs font-mono transition-colors duration-150',
+                  r === ratio
+                    ? 'bg-[var(--accent-primary)] text-white'
+                    : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                ].join(' ')}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Frames control */}
         <div className="flex items-center gap-3">
           <span className="text-sm text-[var(--text-muted)]">Snaps</span>
@@ -95,7 +121,7 @@ export default function UrlForm({ onSubmit, disabled, loading }: UrlFormProps) {
                 onClick={() => setFrames(f)}
                 disabled={disabled || loading}
                 className={[
-                  'px-3 py-1 text-sm font-mono transition-colors duration-150',
+                  'px-3 py-1 text-xs font-mono transition-colors duration-150',
                   f === frames
                     ? 'bg-[var(--accent-primary)] text-white'
                     : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
@@ -118,7 +144,7 @@ export default function UrlForm({ onSubmit, disabled, loading }: UrlFormProps) {
                 onClick={() => setSpeed(s)}
                 disabled={disabled || loading}
                 className={[
-                  'px-3 py-1 text-sm font-mono transition-colors duration-150',
+                  'px-3 py-1 text-xs font-mono transition-colors duration-150',
                   s === speed
                     ? 'bg-[var(--accent-primary)] text-white'
                     : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
@@ -133,3 +159,4 @@ export default function UrlForm({ onSubmit, disabled, loading }: UrlFormProps) {
     </motion.form>
   )
 }
+

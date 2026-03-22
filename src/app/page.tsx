@@ -24,13 +24,13 @@ const fadeUp = {
 export default function Home() {
   const [state, setState] = useState<AppState>({ phase: 'idle' })
 
-  async function handleSubmit(url: string, speed: SpeedOption, frames: FrameCount) {
+  async function handleSubmit(url: string, speed: SpeedOption, frames: FrameCount, ratio: string) {
     setState({ phase: 'submitting' })
     try {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, options: { speed, frames } }),
+        body: JSON.stringify({ url, options: { speed, frames, ratio } }),
       })
       const data = await res.json()
       if (!res.ok) {

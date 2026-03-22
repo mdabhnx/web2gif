@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { db } from '@/lib/db'
 import { checkSSRF } from '@/lib/ssrf'
 import { checkRateLimit } from '@/lib/rateLimit'
-import { PRESETS, type GifPreset } from '@/types/job'
+import { PRESETS, RATIO_VALUES, type GifPreset, type AspectRatio } from '@/types/job'
 
 export async function POST(req: NextRequest) {
   // 1. Real IP
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 3. Parse body
-  let body: { url?: string; options?: { preset?: GifPreset; speed?: number; frames?: number } }
+  let body: { url?: string; options?: { preset?: GifPreset; speed?: number; frames?: number; ratio?: AspectRatio } }
   try {
     body = await req.json()
   } catch {
@@ -48,7 +48,19 @@ export async function POST(req: NextRequest) {
   const frames = body.options?.frames != null
     ? Math.max(4, Math.min(60, Math.round(body.options.frames)))
     : base.frames
-  const options = { ...base, fps: Math.round(base.fps * speedMultiplier), frames }
+
+  const selectedRatio = (body.options?.ratio ?? '16:9') as AspectRatio
+  const ratioVal = RATIO_VALUES[selectedRatio]
+  
+  let height = base.height
+  if (typeof ratioVal === 'number') {
+    height = Math.round(base.width * ratioVal)
+  } else if (ratioVal === 'full') {
+    // Height will be determined by page content in worker
+    height = -1 // Special flag for full height
+  }
+
+  const options = { ...base, height, fps: Math.round(base.fps * speedMultiplier), frames, ratio: selectedRatio }
 
   // 6. Create DB record (status=PENDING — worker polls and picks up)
   const jobId = uuidv4()
