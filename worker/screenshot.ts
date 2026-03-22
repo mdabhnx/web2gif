@@ -73,8 +73,8 @@ export async function captureScreenshots(
     await page.setViewportSize({ width: options.width, height: options.height })
 
     const response = await page.goto(url, {
-      waitUntil: 'networkidle',
-      timeout: 30_000,
+      waitUntil: 'load',
+      timeout: 60_000,
     })
 
     if (response && !response.ok()) {
