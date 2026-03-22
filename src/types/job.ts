@@ -22,13 +22,14 @@ export interface JobOptions {
   fps: number
   duration: number
   quality: number
+  frames: number
 }
 
 export type GifPreset = 'thumbnail' | 'standard' | 'high' | 'mobile'
 
 export const PRESETS: Record<GifPreset, JobOptions> = {
-  thumbnail: { width: 480, height: 300, fps: 4, duration: 2, quality: 70 },
-  standard:  { width: 800, height: 500, fps: 6, duration: 3, quality: 80 },
-  high:      { width: 1200, height: 750, fps: 8, duration: 3, quality: 90 },
-  mobile:    { width: 375, height: 667, fps: 5, duration: 3, quality: 75 },
+  thumbnail: { width: 480, height: 300, fps: 4, duration: 2, quality: 70, frames: 8 },
+  standard:  { width: 800, height: 500, fps: 6, duration: 3, quality: 80, frames: 12 },
+  high:      { width: 1200, height: 750, fps: 8, duration: 3, quality: 90, frames: 15 },
+  mobile:    { width: 375, height: 667, fps: 5, duration: 3, quality: 75, frames: 10 },
 }

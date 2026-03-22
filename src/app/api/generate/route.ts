@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 3. Parse body
-  let body: { url?: string; options?: { preset?: GifPreset } }
+  let body: { url?: string; options?: { preset?: GifPreset; speed?: number; frames?: number } }
   try {
     body = await req.json()
   } catch {
@@ -43,7 +43,12 @@ export async function POST(req: NextRequest) {
 
   // 5. Resolve options
   const preset = (body.options?.preset ?? 'standard') as GifPreset
-  const options = PRESETS[preset] ?? PRESETS.standard
+  const base = PRESETS[preset] ?? PRESETS.standard
+  const speedMultiplier = Math.max(0.25, Math.min(4, body.options?.speed ?? 1))
+  const frames = body.options?.frames != null
+    ? Math.max(4, Math.min(60, Math.round(body.options.frames)))
+    : base.frames
+  const options = { ...base, fps: Math.round(base.fps * speedMultiplier), frames }
 
   // 6. Create DB record (status=PENDING — worker polls and picks up)
   const jobId = uuidv4()

@@ -59,7 +59,7 @@ async function waitForPageReady(page: Page): Promise<void> {
 
 export async function captureScreenshots(
   url: string,
-  options: { width: number; height: number; fps: number; duration: number },
+  options: { width: number; height: number; fps: number; duration: number; frames: number },
   tempDir: string
 ): Promise<string[]> {
   const browser = await chromium.launch({
@@ -102,7 +102,7 @@ export async function captureScreenshots(
     })
 
     const maxScroll = Math.max(0, fullHeight - options.height)
-    const totalFrames = options.fps * options.duration
+    const totalFrames = options.frames
     const scrollStep = totalFrames > 1 ? maxScroll / (totalFrames - 1) : 0
     const framePaths: string[] = []
 

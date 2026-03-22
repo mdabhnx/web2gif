@@ -5,14 +5,28 @@ import { motion } from 'framer-motion'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
-interface UrlFormProps {
-  onSubmit: (url: string) => void
-  disabled: boolean
+export type SpeedOption = 0.5 | 1 | 2
+export type FrameCount = 8 | 12 | 20 | 30
+
+const SPEED_LABELS: Record<SpeedOption, string> = {
+  0.5: '0.5×',
+  1: '1×',
+  2: '2×',
 }
 
-export default function UrlForm({ onSubmit, disabled }: UrlFormProps) {
+const FRAME_OPTIONS: FrameCount[] = [8, 12, 20, 30]
+
+interface UrlFormProps {
+  onSubmit: (url: string, speed: SpeedOption, frames: FrameCount) => void
+  disabled: boolean
+  loading?: boolean
+}
+
+export default function UrlForm({ onSubmit, disabled, loading }: UrlFormProps) {
   const [url, setUrl] = useState('')
   const [error, setError] = useState('')
+  const [speed, setSpeed] = useState<SpeedOption>(1)
+  const [frames, setFrames] = useState<FrameCount>(12)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -36,35 +50,86 @@ export default function UrlForm({ onSubmit, disabled }: UrlFormProps) {
       return
     }
 
-    onSubmit(finalUrl)
+    onSubmit(finalUrl, speed, frames)
   }
 
   return (
     <motion.form
       onSubmit={handleSubmit}
-      className="w-full flex flex-col sm:flex-row gap-3"
+      className="w-full flex flex-col gap-3"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
     >
-      <div className="flex-1">
-        <Input
-          type="text"
-          placeholder="https://example.com"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          error={error}
-          disabled={disabled}
-        />
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-1">
+          <Input
+            type="text"
+            placeholder="https://example.com"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            error={error}
+            disabled={disabled || loading}
+          />
+        </div>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={disabled || loading}
+          loading={loading}
+          className="whitespace-nowrap"
+        >
+          Generate GIF →
+        </Button>
       </div>
-      <Button
-        type="submit"
-        variant="primary"
-        disabled={disabled}
-        className="whitespace-nowrap"
-      >
-        Generate GIF →
-      </Button>
+
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        {/* Frames control */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-[var(--text-muted)]">Snaps</span>
+          <div className="flex rounded-lg overflow-hidden border border-[var(--border-subtle)]">
+            {FRAME_OPTIONS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFrames(f)}
+                disabled={disabled || loading}
+                className={[
+                  'px-3 py-1 text-sm font-mono transition-colors duration-150',
+                  f === frames
+                    ? 'bg-[var(--accent-primary)] text-white'
+                    : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                ].join(' ')}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Speed control */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-[var(--text-muted)]">Speed</span>
+          <div className="flex rounded-lg overflow-hidden border border-[var(--border-subtle)]">
+            {([0.5, 1, 2] as SpeedOption[]).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSpeed(s)}
+                disabled={disabled || loading}
+                className={[
+                  'px-3 py-1 text-sm font-mono transition-colors duration-150',
+                  s === speed
+                    ? 'bg-[var(--accent-primary)] text-white'
+                    : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                ].join(' ')}
+              >
+                {SPEED_LABELS[s]}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </motion.form>
   )
 }

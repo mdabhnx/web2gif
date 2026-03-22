@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import UrlForm from '@/components/UrlForm'
+import UrlForm, { type SpeedOption, type FrameCount } from '@/components/UrlForm'
 import JobStatus from '@/components/JobStatus'
 import GifResult from '@/components/GifResult'
 import type { GifMeta } from '@/types/job'
@@ -24,13 +24,13 @@ const fadeUp = {
 export default function Home() {
   const [state, setState] = useState<AppState>({ phase: 'idle' })
 
-  async function handleSubmit(url: string) {
+  async function handleSubmit(url: string, speed: SpeedOption, frames: FrameCount) {
     setState({ phase: 'submitting' })
     try {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, options: { speed, frames } }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -86,11 +86,12 @@ export default function Home() {
           transition={{ duration: 0.4, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
         >
           <AnimatePresence mode="wait">
-            {(state.phase === 'idle' || state.phase === 'error') && (
+            {(state.phase === 'idle' || state.phase === 'error' || state.phase === 'submitting') && (
               <motion.div key="form" {...fadeUp} className="space-y-4">
                 <UrlForm
                   onSubmit={handleSubmit}
-                  disabled={false}
+                  disabled={state.phase === 'submitting'}
+                  loading={state.phase === 'submitting'}
                 />
                 {state.phase === 'error' && (
                   <p className="text-sm text-[var(--error)]">{state.message}</p>
@@ -98,11 +99,7 @@ export default function Home() {
               </motion.div>
             )}
 
-            {state.phase === 'submitting' && (
-              <motion.div key="submitting" {...fadeUp} className="flex justify-center py-8">
-                <span className="inline-block w-8 h-8 rounded-full border-2 border-[var(--accent-primary)]/30 border-t-[var(--accent-primary)] animate-spin" />
-              </motion.div>
-            )}
+
 
             {state.phase === 'polling' && (
               <motion.div key="polling" {...fadeUp}>
