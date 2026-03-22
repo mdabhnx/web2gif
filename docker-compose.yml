@@ -1,34 +1,39 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16-alpine
+  web2gif:
+    build: .
+    ports:
+      - "3000:3000"
     environment:
-      POSTGRES_USER: web2gif
-      POSTGRES_PASSWORD: web2gif
-      POSTGRES_DB: web2gif
-    ports:
-      - '5432:5432'
+      - DATABASE_URL=file:/app/prisma/prod.db
+      - NODE_ENV=production
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U web2gif']
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - ./prisma:/app/prisma
+      - ./public/outputs:/app/public/outputs
+    restart: always
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - '6379:6379'
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 5s
-      timeout: 3s
-      retries: 5
+# These optional services were part of the initial plan/infrastructure.
+# If you choose to switch to Postgres or BullMQ (Redis), you can enable them here.
+#
+#  postgres:
+#    image: postgres:16-alpine
+#    environment:
+#      POSTGRES_USER: web2gif
+#      POSTGRES_PASSWORD: web2gif
+#      POSTGRES_DB: web2gif
+#    ports:
+#      - '5432:5432'
+#    volumes:
+#      - postgres-data:/var/lib/postgresql/data
+#
+#  redis:
+#    image: redis:7-alpine
+#    ports:
+#      - '6379:6379'
+#    volumes:
+#      - redis-data:/data
 
-volumes:
-  postgres-data:
-  redis-data:
+# volumes:
+#   postgres-data:
+#   redis-data:
