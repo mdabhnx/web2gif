@@ -57,6 +57,53 @@ async function waitForPageReady(page: Page): Promise<void> {
   await page.waitForTimeout(800)
 }
 
+/**
+ * Forcefully removes common cookie banners, consent popups, and other obtrusive
+ * overlays that might block the page content.
+ */
+async function removeOverlays(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    // 1. Target by common IDs and classes (case-insensitive)
+    const commonSelectors = [
+      '[id*="cookie" i]', '[class*="cookie" i]',
+      '[id*="consent" i]', '[class*="consent" i]',
+      '[id*="onetrust" i]', '[class*="onetrust" i]',
+      '[id*="gdpr" i]', '[class*="gdpr" i]',
+      '[id*="privacy" i]', '[class*="privacy" i]',
+      '[id*="notice" i]', '[class*="notice" i]',
+      '#CybotCookiebotDialog',
+      '#qc-cmp2-container',
+      '#didomi-host',
+      '#cookiescript_injected',
+      '#cookiescript_injected_wrapper',
+      '.cc-window',
+      '.cc-banner',
+      '.osano-cm-window',
+      '#trustarc-consent-track',
+    ]
+
+    commonSelectors.forEach((sel) => {
+      document.querySelectorAll(sel).forEach((el) => {
+        // Only remove if it looks like an overlay (fixed/absolute and high z-index)
+        // or if it's a known library selector.
+        const s = window.getComputedStyle(el)
+        const isOverlay = s.position === 'fixed' || s.position === 'absolute'
+        const hasHighZ = parseInt(s.zIndex) > 100
+
+        // If it's a known library ID or a fixed/high-z element with matching keywords, remove it.
+        if (isOverlay || hasHighZ || sel.startsWith('#') || sel.includes('cookie') || sel.includes('consent')) {
+          el.remove()
+        }
+      })
+    })
+
+    // 2. Unlock scrolling — many sites lock body scroll when a modal is active
+    document.body.style.setProperty('overflow', 'auto', 'important')
+    document.body.style.setProperty('position', 'static', 'important')
+    document.documentElement.style.setProperty('overflow', 'auto', 'important')
+  })
+}
+
 export async function captureScreenshots(
   url: string,
   options: { width: number; height: number; fps: number; duration: number; frames: number },
@@ -83,6 +130,9 @@ export async function captureScreenshots(
 
     // Wait for loaders / splash screens to finish before measuring the page
     await waitForPageReady(page)
+
+    // Remove cookie banners and other obtrusive overlays
+    await removeOverlays(page)
 
     // Disable smooth scrolling so scrollTo jumps instantly
     await page.addStyleTag({
